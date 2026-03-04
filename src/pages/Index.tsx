@@ -8,6 +8,7 @@ import BottomNav from "@/components/BottomNav";
 import SearchOverlay from "@/components/SearchOverlay";
 import FoodItemModal from "@/components/FoodItemModal";
 import FilterBar, { Filters } from "@/components/FilterBar";
+import PromoBanner from "@/components/PromoBanner";
 
 const defaultFilters: Filters = {
   openNow: false,
@@ -35,11 +36,11 @@ const Index = () => {
     filters.maxDeliveryTime < 60;
 
   return (
-    /* Scaffold: full screen container, nav fixed outside scroll flow */
     <div className="max-w-md mx-auto h-screen flex flex-col bg-background relative">
       {/* Scrollable content area */}
-      <div className="flex-1 overflow-y-auto overscroll-contain pb-24 page-enter">
+      <div className="flex-1 overflow-y-auto overscroll-contain pb-28 page-enter">
         <AppHeader onFilterTap={() => setShowFilters(!showFilters)} hasActiveFilters={hasActiveFilters} />
+        <PromoBanner />
         <CategoryFilter active={activeCategory} onSelect={setActiveCategory} />
         <TopPlaces filters={filters} onFoodTap={setSelectedFood} />
         <MealSection title="Meals under 5k" filterFn={(s) => s.deliveryFee <= 1000} onFoodTap={setSelectedFood} />
@@ -47,10 +48,10 @@ const Index = () => {
         <div className="h-4" />
       </div>
 
-      {/* Fixed bottom nav — outside scroll container */}
+      {/* Fixed bottom nav */}
       <BottomNav active="home" onSearch={() => setSearchOpen(true)} />
 
-      {/* Filter panel — slides up from nav bar height */}
+      {/* Filter panel */}
       {showFilters && (
         <FilterBar
           filters={filters}

@@ -7,6 +7,7 @@ import { CartProvider } from "@/contexts/CartContext";
 import { FavouritesProvider } from "@/contexts/FavouritesContext";
 import { LocationProvider } from "@/contexts/LocationContext";
 import Index from "./pages/Index";
+import OnboardingPage from "./pages/OnboardingPage";
 import ProfilePage from "./pages/ProfilePage";
 import OrdersPage from "./pages/OrdersPage";
 import CartPage from "./pages/CartPage";
@@ -28,6 +29,7 @@ const App = () => (
             <Sonner />
             <BrowserRouter>
               <Routes>
+                <Route path="/welcome" element={<OnboardingPage />} />
                 <Route path="/" element={<Index />} />
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/orders" element={<OrdersPage />} />
