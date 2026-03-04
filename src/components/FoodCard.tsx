@@ -40,31 +40,39 @@ const FoodCard = ({ food, onTap }: FoodCardProps) => {
       onClick={() => onTap(food)}
       className="flex-shrink-0 w-44 text-left card-lift"
     >
-      <div className="relative rounded-3xl overflow-hidden h-36 bg-muted shadow-sm">
+      <div
+        className="relative rounded-3xl overflow-hidden h-36 shadow-lg"
+        style={{ boxShadow: "0 4px 20px hsl(0 0% 0% / 0.35)" }}
+      >
         <img
           src={food.image}
           alt={food.name}
           className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
 
         {!food.isOpen && (
-          <div className="absolute inset-0 bg-foreground/50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
             <span className="text-[10px] font-bold text-white bg-destructive px-2 py-0.5 rounded-full">Closed</span>
           </div>
         )}
 
         {/* Price badge */}
-        <span className="absolute top-2 left-2 bg-card/90 backdrop-blur-sm text-xs font-bold text-primary px-2 py-0.5 rounded-full">
+        <span
+          className="absolute top-2 left-2 text-xs font-bold px-2 py-0.5 rounded-full"
+          style={{ background: "hsl(var(--primary))", color: "white" }}
+        >
           ₦{food.price.toLocaleString()}
         </span>
 
         {/* Fav button */}
         <button
           onClick={handleFav}
-          className={`absolute top-2 right-2 w-7 h-7 rounded-full backdrop-blur-md flex items-center justify-center transition-colors ${
-            isFav ? "bg-destructive/20 text-destructive" : "bg-card/80 text-foreground"
-          }`}
+          className="absolute top-2 right-2 w-7 h-7 rounded-full backdrop-blur-md flex items-center justify-center transition-colors"
+          style={{
+            background: isFav ? "hsl(var(--destructive) / 0.25)" : "hsl(0 0% 0% / 0.45)",
+            color: isFav ? "hsl(var(--destructive))" : "white",
+          }}
         >
           <FourPointStar
             filled={isFav}
@@ -75,20 +83,20 @@ const FoodCard = ({ food, onTap }: FoodCardProps) => {
         {/* Plus button */}
         <button
           onClick={(e) => { e.stopPropagation(); onTap(food); }}
-          className="absolute bottom-2 right-2 w-7 h-7 rounded-full flex items-center justify-center text-white shadow-md btn-press"
-          style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--vendoor-amber)))" }}
+          className="absolute bottom-2 right-2 w-7 h-7 rounded-full flex items-center justify-center text-white shadow-lg btn-press"
+          style={{ background: "hsl(var(--primary))" }}
         >
           <Plus className="w-3.5 h-3.5" />
         </button>
       </div>
 
-      <div className="mt-2">
-        <h3 className="text-sm font-semibold text-foreground truncate">{food.name}</h3>
-        <p className="text-xs text-muted-foreground truncate">{food.shopName}</p>
+      <div className="mt-2 px-0.5">
+        <h3 className="text-sm font-semibold truncate" style={{ color: "hsl(var(--foreground))" }}>{food.name}</h3>
+        <p className="text-xs truncate" style={{ color: "hsl(var(--muted-foreground))" }}>{food.shopName}</p>
         {shop && (
           <div className="flex items-center gap-1 mt-0.5">
-            <Star className="w-3 h-3 fill-vendoor-amber text-vendoor-amber" />
-            <span className="text-xs font-medium text-foreground">{shop.rating}</span>
+            <Star className="w-3 h-3" style={{ fill: "hsl(var(--vendoor-amber))", color: "hsl(var(--vendoor-amber))" }} />
+            <span className="text-xs font-medium" style={{ color: "hsl(var(--foreground))" }}>{shop.rating}</span>
           </div>
         )}
       </div>

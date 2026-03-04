@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, Minus, Plus, Sparkles, Calendar, Star, Bike, Tag, ChevronRight, MapPin, Clock, Navigation } from "lucide-react";
+import { X, Minus, Plus, Sparkles, Calendar, Star, Bike, Tag, ChevronRight, MapPin, Clock, Navigation, ChevronDown } from "lucide-react";
 import { FoodItem, shops } from "@/data/mockData";
 import { useCart } from "@/contexts/CartContext";
 import { useFavourites } from "@/contexts/FavouritesContext";
@@ -36,6 +36,7 @@ const FoodItemModal = ({ food, onClose }: FoodItemModalProps) => {
   const [promoApplied, setPromoApplied] = useState("");
   const [promoError, setPromoError] = useState("");
   const [starPop, setStarPop] = useState(false);
+  const [descExpanded, setDescExpanded] = useState(false);
 
   const { addToCart } = useCart();
   const { isFoodFav, toggleFoodFav } = useFavourites();
@@ -76,91 +77,144 @@ const FoodItemModal = ({ food, onClose }: FoodItemModalProps) => {
   };
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" onClick={onClose}>
-      <div className="absolute inset-0 bg-foreground/40 backdrop-blur-sm" />
+    <div className="fixed inset-0 z-[60] flex items-end justify-center" onClick={onClose}>
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+
+      {/* Sheet — slides up from bottom, extends above nav */}
       <div
-        className="relative w-full max-w-sm bg-card rounded-3xl overflow-hidden shadow-2xl max-h-[88vh] flex flex-col animate-in zoom-in-95 fade-in duration-200"
+        className="relative w-full max-w-md bg-card rounded-t-[28px] overflow-hidden shadow-2xl max-h-[92vh] flex flex-col slide-up-from-nav"
+        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Image */}
-        <div className="relative h-44 flex-shrink-0">
+        {/* Hero image — top 45% */}
+        <div className="relative h-52 flex-shrink-0">
           <img src={food.image} alt={food.name} className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-card/80 to-transparent" />
-          <button onClick={onClose} className="absolute top-3 left-3 p-2 rounded-full bg-card/80 backdrop-blur-md">
-            <X className="w-4 h-4 text-foreground" />
+          {/* Gradient overlay for depth */}
+          <div className="absolute inset-0 bg-gradient-to-t from-card via-card/20 to-transparent" />
+
+          {/* Top controls */}
+          <button onClick={onClose} className="absolute top-4 left-4 p-2.5 rounded-full backdrop-blur-md"
+            style={{ background: "hsl(0 0% 0% / 0.45)" }}>
+            <X className="w-4 h-4 text-white" />
           </button>
           <button
             onClick={handleFavToggle}
-            className={`absolute top-3 right-3 p-2 rounded-full backdrop-blur-md transition-colors ${isFav ? "bg-destructive/20 text-destructive" : "bg-card/80 text-foreground"}`}
+            className="absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md transition-colors"
+            style={{
+              background: isFav ? "hsl(var(--destructive) / 0.3)" : "hsl(0 0% 0% / 0.45)",
+              color: isFav ? "hsl(var(--destructive))" : "white",
+            }}
           >
             <FourPointStar filled={isFav} className={`w-5 h-5 ${starPop ? "star-pop" : ""}`} />
           </button>
+
           {!food.isOpen && (
-            <div className="absolute inset-0 bg-foreground/50 flex items-center justify-center">
-              <span className="text-sm font-bold text-primary-foreground bg-destructive px-3 py-1.5 rounded-full">Currently Closed</span>
+            <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+              <span className="text-sm font-bold text-white bg-destructive px-3 py-1.5 rounded-full">Currently Closed</span>
             </div>
           )}
         </div>
 
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-3">
-          {/* Title + price */}
+        {/* Scrollable content */}
+        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
+          {/* Item name + price row */}
           <div>
-            <h2 className="text-xl font-bold text-foreground">{food.name}</h2>
-            <div className="flex items-center gap-2 mt-1">
-              <p className="text-2xl font-bold text-primary">₦{food.price.toLocaleString()}</p>
+            <h2 className="text-2xl font-black" style={{ color: "hsl(var(--foreground))" }}>{food.name}</h2>
+
+            {/* Location text */}
+            <div className="flex items-center gap-1.5 mt-1">
+              <MapPin className="w-3.5 h-3.5" style={{ color: "hsl(var(--muted-foreground))" }} />
+              <span className="text-xs" style={{ color: "hsl(var(--muted-foreground))" }}>{food.shopName}</span>
+              <span
+                className="ml-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+                style={food.isOpen
+                  ? { background: "hsl(177 98% 19% / 0.2)", color: "hsl(177 98% 35%)" }
+                  : { background: "hsl(var(--destructive) / 0.15)", color: "hsl(var(--destructive))" }
+                }
+              >
+                {food.isOpen ? "Open" : "Closed"}
+              </span>
+            </div>
+
+            {/* Price */}
+            <div className="flex items-baseline gap-2 mt-2">
+              <p className="text-3xl font-black" style={{ color: "hsl(var(--primary))" }}>
+                ₦{food.price.toLocaleString()}
+              </p>
               {promoDiscount > 0 && (
-                <span className="text-xs font-bold px-1.5 py-0.5 rounded-full bg-green-100 text-green-700">
+                <span className="text-xs font-bold px-2 py-0.5 rounded-full"
+                  style={{ background: "hsl(177 98% 19% / 0.2)", color: "hsl(177 98% 35%)" }}>
                   -{promoDiscount}%
                 </span>
               )}
             </div>
-            {/* Delivery fee, distance & time — right below price */}
+
+            {/* Rating + time + delivery row */}
             <div className="flex items-center gap-3 mt-2 flex-wrap">
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <Bike className="w-3.5 h-3.5 text-primary" />
-                <span>₦{shop?.deliveryFee?.toLocaleString() ?? "—"} delivery</span>
+              {shop && (
+                <div className="flex items-center gap-1">
+                  <Star className="w-3.5 h-3.5" style={{ fill: "hsl(var(--vendoor-amber))", color: "hsl(var(--vendoor-amber))" }} />
+                  <span className="text-xs font-semibold" style={{ color: "hsl(var(--foreground))" }}>{shop.rating}</span>
+                </div>
+              )}
+              <div className="flex items-center gap-1">
+                <Clock className="w-3.5 h-3.5" style={{ color: "hsl(var(--primary))" }} />
+                <span className="text-xs" style={{ color: "hsl(var(--muted-foreground))" }}>{shop?.deliveryTime ?? "—"}</span>
               </div>
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <Navigation className="w-3.5 h-3.5 text-primary" />
-                <span>1.2 km away</span>
+              <div className="flex items-center gap-1">
+                <Navigation className="w-3.5 h-3.5" style={{ color: "hsl(var(--primary))" }} />
+                <span className="text-xs" style={{ color: "hsl(var(--muted-foreground))" }}>1.2 km</span>
               </div>
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <Clock className="w-3.5 h-3.5 text-primary" />
-                <span>{shop?.deliveryTime ?? "—"}</span>
+              <div className="flex items-center gap-1">
+                <Bike className="w-3.5 h-3.5" style={{ color: "hsl(var(--primary))" }} />
+                <span className="text-xs" style={{ color: "hsl(var(--muted-foreground))" }}>₦{shop?.deliveryFee?.toLocaleString() ?? "—"}</span>
               </div>
-              <span className={`text-xs font-bold px-1.5 py-0.5 rounded-full ${food.isOpen ? "bg-green-100 text-green-700" : "bg-destructive/15 text-destructive"}`}>
-                {food.isOpen ? "Open" : "Closed"}
-              </span>
             </div>
           </div>
 
-          {/* Location */}
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <MapPin className="w-4 h-4 text-primary" />
-            <span>{food.shopName}</span>
+          {/* Description — expandable */}
+          <div>
+            <p
+              className="text-sm leading-relaxed"
+              style={{
+                color: "hsl(var(--muted-foreground))",
+                display: "-webkit-box",
+                WebkitLineClamp: descExpanded ? "unset" : 2,
+                WebkitBoxOrient: "vertical",
+                overflow: descExpanded ? "visible" : "hidden",
+              } as React.CSSProperties}
+            >
+              {food.description}
+            </p>
+            <button
+              onClick={() => setDescExpanded(!descExpanded)}
+              className="flex items-center gap-1 text-xs font-semibold mt-1"
+              style={{ color: "hsl(var(--primary))" }}
+            >
+              {descExpanded ? "Show less" : "Show more"}
+              <ChevronDown className={`w-3.5 h-3.5 transition-transform ${descExpanded ? "rotate-180" : ""}`} />
+            </button>
           </div>
 
-          {/* Vendor mini card — right after location */}
+          {/* Vendor mini card */}
           {shop && (
             <button
               onClick={() => { onClose(); navigate(`/vendor/${shop.id}`); }}
-              className="w-full flex items-center gap-3 p-3 rounded-2xl bg-muted active:scale-[0.98] transition-transform"
+              className="w-full flex items-center gap-3 p-3 rounded-2xl transition-all active:scale-[0.98]"
+              style={{ background: "hsl(var(--muted))", border: "1px solid hsl(var(--border))" }}
             >
               <img src={shop.image} alt={shop.name} className="w-10 h-10 rounded-xl object-cover" />
               <div className="flex-1 text-left">
-                <p className="text-sm font-semibold text-foreground">{shop.name}</p>
-                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <Star className="w-3 h-3 fill-vendoor-amber text-vendoor-amber" />
-                  <span className="font-medium text-foreground">{shop.rating}</span>
+                <p className="text-sm font-semibold" style={{ color: "hsl(var(--foreground))" }}>{shop.name}</p>
+                <div className="flex items-center gap-1.5 text-xs" style={{ color: "hsl(var(--muted-foreground))" }}>
+                  <Star className="w-3 h-3" style={{ fill: "hsl(var(--vendoor-amber))", color: "hsl(var(--vendoor-amber))" }} />
+                  <span className="font-medium" style={{ color: "hsl(var(--foreground))" }}>{shop.rating}</span>
                   <span>•</span>
                   <span>{shop.reviews} orders</span>
-                  <span>•</span>
-                  <Bike className="w-3 h-3 text-primary" />
-                  <span>₦{shop.deliveryFee}</span>
                 </div>
               </div>
-              <ChevronRight className="w-4 h-4 text-muted-foreground" />
+              <ChevronRight className="w-4 h-4" style={{ color: "hsl(var(--muted-foreground))" }} />
             </button>
           )}
 
@@ -170,14 +224,14 @@ const FoodItemModal = ({ food, onClose }: FoodItemModalProps) => {
               <button
                 key={type}
                 onClick={() => setDeliveryType(type)}
-                className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-1.5 ${
-                  deliveryType === type ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
-                }`}
+                className="flex-1 py-2.5 rounded-2xl text-sm font-semibold transition-all flex items-center justify-center gap-1.5"
+                style={deliveryType === type
+                  ? { background: "hsl(var(--primary))", color: "white", boxShadow: "0 4px 12px hsl(var(--primary) / 0.35)" }
+                  : { background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))" }
+                }
               >
                 {type === "delivery" ? (
-                  <>
-                    <Bike className="w-4 h-4" /> Delivery
-                  </>
+                  <><Bike className="w-4 h-4" /> Delivery</>
                 ) : (
                   <>
                     <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2">
@@ -193,9 +247,11 @@ const FoodItemModal = ({ food, onClose }: FoodItemModalProps) => {
           {/* Schedule */}
           <button
             onClick={() => setScheduling(!scheduling)}
-            className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-              scheduling ? "bg-primary/15 text-primary" : "bg-muted text-foreground"
-            }`}
+            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-2xl text-sm font-semibold transition-colors"
+            style={scheduling
+              ? { background: "hsl(var(--primary) / 0.15)", color: "hsl(var(--primary))" }
+              : { background: "hsl(var(--muted))", color: "hsl(var(--foreground))" }
+            }
           >
             <Calendar className="w-4 h-4" />
             {scheduling ? "Cancel Schedule" : "Schedule Order"}
@@ -203,103 +259,92 @@ const FoodItemModal = ({ food, onClose }: FoodItemModalProps) => {
 
           {scheduling && (
             <div className="flex gap-2">
-              <input
-                type="date"
-                value={scheduleDate}
-                onChange={(e) => setScheduleDate(e.target.value)}
-                className="flex-1 px-3 py-2 rounded-xl bg-muted text-foreground text-sm border-none outline-none"
-                min={new Date().toISOString().split("T")[0]}
-              />
-              <input
-                type="time"
-                value={scheduleTime}
-                onChange={(e) => setScheduleTime(e.target.value)}
-                className="flex-1 px-3 py-2 rounded-xl bg-muted text-foreground text-sm border-none outline-none"
-              />
-            </div>
-          )}
-
-          {scheduleDate && scheduleTime && (
-            <div className="px-3 py-2 rounded-xl bg-vendoor-amber/10 text-xs text-vendoor-amber font-medium">
-              📅 Scheduled for {new Date(`${scheduleDate}T${scheduleTime}`).toLocaleString()}
+              <input type="date" value={scheduleDate} onChange={(e) => setScheduleDate(e.target.value)}
+                className="flex-1 px-3 py-2 rounded-xl text-sm outline-none"
+                style={{ background: "hsl(var(--muted))", color: "hsl(var(--foreground))", border: "none" }}
+                min={new Date().toISOString().split("T")[0]} />
+              <input type="time" value={scheduleTime} onChange={(e) => setScheduleTime(e.target.value)}
+                className="flex-1 px-3 py-2 rounded-xl text-sm outline-none"
+                style={{ background: "hsl(var(--muted))", color: "hsl(var(--foreground))", border: "none" }} />
             </div>
           )}
 
           {/* Promo code */}
           <div className="flex gap-2">
-            <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-xl bg-muted">
-              <Tag className="w-3.5 h-3.5 text-muted-foreground" />
-              <input
-                value={promoInput}
-                onChange={(e) => { setPromoInput(e.target.value); setPromoError(""); }}
-                placeholder="Promo code (e.g. VENDOOR10)"
-                className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
-              />
+            <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-2xl"
+              style={{ background: "hsl(var(--muted))" }}>
+              <Tag className="w-3.5 h-3.5" style={{ color: "hsl(var(--muted-foreground))" }} />
+              <input value={promoInput} onChange={(e) => { setPromoInput(e.target.value); setPromoError(""); }}
+                placeholder="Promo code"
+                className="flex-1 bg-transparent text-sm outline-none"
+                style={{ color: "hsl(var(--foreground))" }} />
             </div>
-            <button
-              onClick={applyPromo}
-              className="px-3 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold"
-            >
+            <button onClick={applyPromo}
+              className="px-4 py-2 rounded-2xl text-xs font-bold"
+              style={{ background: "hsl(var(--primary))", color: "white" }}>
               Apply
             </button>
           </div>
-          {promoError && <p className="text-xs text-destructive -mt-1">{promoError}</p>}
-          {promoApplied && <p className="text-xs text-green-600 -mt-1">✓ {promoApplied} applied — {promoDiscount}% off</p>}
+          {promoError && <p className="text-xs" style={{ color: "hsl(var(--destructive))" }}>{promoError}</p>}
+          {promoApplied && <p className="text-xs" style={{ color: "hsl(177 98% 35%)" }}>✓ {promoApplied} applied — {promoDiscount}% off</p>}
 
           {/* Note */}
-          <textarea
-            placeholder="Special instructions (e.g., less pepper, no onions)..."
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            className="w-full px-3 py-2.5 rounded-xl bg-muted text-sm text-foreground placeholder:text-muted-foreground resize-none h-14 border-none outline-none"
-          />
+          <textarea placeholder="Special instructions (e.g., less pepper, no onions)..."
+            value={note} onChange={(e) => setNote(e.target.value)}
+            className="w-full px-3 py-2.5 rounded-2xl text-sm resize-none h-16 outline-none"
+            style={{ background: "hsl(var(--muted))", color: "hsl(var(--foreground))", border: "none" }} />
 
           {/* Quantity */}
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-foreground">Quantity</span>
+            <span className="text-sm font-semibold" style={{ color: "hsl(var(--foreground))" }}>Quantity</span>
             <div className="flex items-center gap-3">
-              <button
-                onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                className="w-9 h-9 rounded-full bg-muted flex items-center justify-center text-foreground"
-              >
+              <button onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                className="w-9 h-9 rounded-full flex items-center justify-center"
+                style={{ background: "hsl(var(--muted))", color: "hsl(var(--foreground))" }}>
                 <Minus className="w-4 h-4" />
               </button>
-              <span className="text-lg font-bold text-foreground w-6 text-center">{quantity}</span>
-              <button
-                onClick={() => setQuantity(quantity + 1)}
-                className="w-9 h-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center"
-              >
+              <span className="text-lg font-black w-6 text-center" style={{ color: "hsl(var(--foreground))" }}>{quantity}</span>
+              <button onClick={() => setQuantity(quantity + 1)}
+                className="w-9 h-9 rounded-full flex items-center justify-center"
+                style={{ background: "hsl(var(--primary))", color: "white" }}>
                 <Plus className="w-4 h-4" />
               </button>
             </div>
           </div>
         </div>
 
-        {/* Add to Orders button */}
-        <div className="p-4 pt-0 flex-shrink-0">
+        {/* Fixed CTA — total + Add to cart */}
+        <div className="px-5 pb-5 pt-3 flex-shrink-0"
+          style={{ borderTop: "1px solid hsl(var(--border))", background: "hsl(var(--card))" }}>
           {promoDiscount > 0 && (
             <div className="flex items-center justify-between text-xs mb-2 px-1">
-              <span className="text-muted-foreground">Original: ₦{basePrice.toLocaleString()}</span>
-              <span className="text-green-600 font-medium">Saving ₦{discountAmount.toLocaleString()}</span>
+              <span style={{ color: "hsl(var(--muted-foreground))" }}>Original: ₦{basePrice.toLocaleString()}</span>
+              <span style={{ color: "hsl(177 98% 35%)" }} className="font-medium">Saving ₦{discountAmount.toLocaleString()}</span>
             </div>
           )}
-          <button
-            onClick={handleAddToOrders}
-            disabled={!food.isOpen}
-            className="w-full py-4 rounded-2xl text-base font-bold relative overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.98] btn-press"
-            style={{
-              background: "linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--vendoor-amber)) 50%, hsl(var(--primary)) 100%)",
-              backgroundSize: "200% 200%",
-              color: "hsl(var(--primary-foreground))",
-              boxShadow: "0 8px 32px hsl(var(--primary) / 0.4), inset 0 1px 0 hsl(0 0% 100% / 0.3), inset 0 -1px 0 hsl(0 0% 0% / 0.1)",
-            }}
-          >
-            <span className="relative z-10 flex items-center justify-center gap-2">
-              <Sparkles className="w-4 h-4" />
-              Add to Orders • ₦{totalPrice.toLocaleString()}
-            </span>
-            <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent rounded-2xl pointer-events-none" />
-          </button>
+          <div className="flex items-center gap-3">
+            {/* Total */}
+            <div className="flex flex-col">
+              <span className="text-[10px] font-medium" style={{ color: "hsl(var(--muted-foreground))" }}>Total</span>
+              <span className="text-xl font-black" style={{ color: "hsl(var(--foreground))" }}>₦{totalPrice.toLocaleString()}</span>
+            </div>
+            {/* CTA button */}
+            <button
+              onClick={handleAddToOrders}
+              disabled={!food.isOpen}
+              className="flex-1 py-4 rounded-2xl text-base font-bold relative overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.97]"
+              style={{
+                background: "linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--vendoor-amber)) 100%)",
+                color: "white",
+                boxShadow: "0 8px 24px hsl(var(--primary) / 0.4)",
+              }}
+            >
+              <span className="relative z-10 flex items-center justify-center gap-2">
+                <Sparkles className="w-4 h-4" />
+                Add to Cart
+              </span>
+            </button>
+          </div>
         </div>
       </div>
     </div>

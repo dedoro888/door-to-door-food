@@ -33,17 +33,13 @@ const BottomNav = ({ active, onSearch }: BottomNavProps) => {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-30 pointer-events-none">
-      {/* Safe area / gradient fade */}
-      <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent pointer-events-none" />
-      <div className="max-w-md mx-auto px-4 pb-3 pt-2 relative">
+      <div className="max-w-md mx-auto px-4 pb-4 pt-2 relative pointer-events-auto">
         <div
-          className="pointer-events-auto relative flex items-center justify-around py-2 px-1 rounded-[28px]"
+          className="flex items-center justify-around py-2 px-2 rounded-[24px]"
           style={{
-            background: "linear-gradient(135deg, hsla(0,0%,100%,0.55) 0%, hsla(0,0%,100%,0.35) 100%)",
-            backdropFilter: "blur(28px) saturate(1.9)",
-            WebkitBackdropFilter: "blur(28px) saturate(1.9)",
-            boxShadow: "0 8px 32px hsla(0,0%,0%,0.14), inset 0 1px 0 hsla(0,0%,100%,0.7), inset 0 -1px 0 hsla(0,0%,0%,0.06)",
-            border: "1px solid hsla(0,0%,100%,0.55)",
+            background: "hsl(20 15% 10%)",
+            border: "1px solid hsl(20 12% 22%)",
+            boxShadow: "0 -4px 24px hsl(0 0% 0% / 0.4), 0 8px 32px hsl(0 0% 0% / 0.3)",
           }}
         >
           {tabs.map((tab) => {
@@ -53,42 +49,30 @@ const BottomNav = ({ active, onSearch }: BottomNavProps) => {
               <button
                 key={tab.id}
                 onClick={() => handleTap(tab)}
-                className="relative flex flex-col items-center justify-center transition-all duration-300 ease-out w-14 py-1 gap-0.5"
-                style={{ zIndex: isActive ? 10 : 1 }}
+                className="relative flex flex-col items-center justify-center transition-all duration-200 ease-out w-14 py-1.5 gap-0.5 rounded-2xl"
               >
-                {/* Active pill background */}
+                {/* Active highlight — pill under icon only, no halo */}
                 {isActive && (
                   <div
-                    className="absolute inset-0 rounded-2xl animate-scale-in"
+                    className="absolute inset-0 rounded-2xl"
                     style={{
-                      background: "linear-gradient(135deg, hsl(var(--primary) / 0.18) 0%, hsl(var(--accent) / 0.25) 100%)",
+                      background: "hsl(var(--primary) / 0.15)",
                     }}
                   />
                 )}
 
-                <div className="relative w-8 h-8 flex items-center justify-center">
-                  {/* Active dot indicator */}
-                  {isActive && (
-                    <div
-                      className="absolute -top-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full"
-                      style={{ background: "hsl(var(--primary))" }}
-                    />
-                  )}
+                <div className="relative w-7 h-7 flex items-center justify-center">
                   <Icon
-                    className={`relative w-5 h-5 transition-all duration-300 ${
-                      isActive
-                        ? "scale-110"
-                        : "text-muted-foreground"
-                    }`}
-                    style={isActive ? { color: "hsl(var(--primary))" } : {}}
+                    className="relative w-[18px] h-[18px] transition-all duration-200"
+                    style={isActive ? { color: "hsl(var(--primary))", strokeWidth: 2.5 } : { color: "hsl(var(--muted-foreground))" }}
                   />
                   {/* Orders badge */}
                   {tab.id === "orders" && activeOrderCount > 0 && (
                     <span
-                      className="absolute -top-1 -right-1 min-w-[16px] h-[16px] rounded-full text-[9px] font-bold flex items-center justify-center px-0.5 z-20"
+                      className="absolute -top-1.5 -right-1.5 min-w-[16px] h-[16px] rounded-full text-[9px] font-bold flex items-center justify-center px-0.5 z-20"
                       style={{
                         background: "hsl(var(--destructive))",
-                        color: "hsl(var(--primary-foreground))",
+                        color: "white",
                       }}
                     >
                       {activeOrderCount > 9 ? "9+" : activeOrderCount}
@@ -97,10 +81,8 @@ const BottomNav = ({ active, onSearch }: BottomNavProps) => {
                 </div>
 
                 <span
-                  className={`relative text-[10px] font-semibold transition-all duration-300 leading-none ${
-                    isActive ? "" : "text-muted-foreground"
-                  }`}
-                  style={isActive ? { color: "hsl(var(--primary))" } : {}}
+                  className="relative text-[9px] font-semibold transition-all duration-200 leading-none"
+                  style={isActive ? { color: "hsl(var(--primary))" } : { color: "hsl(var(--muted-foreground))" }}
                 >
                   {tab.label}
                 </span>
