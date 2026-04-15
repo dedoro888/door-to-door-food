@@ -1,11 +1,13 @@
-import { useState, useCallback } from "react";
-import { MapPin, X, Check, Navigation, Search, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { MapPin, X, Check, Navigation, Search, Loader2, Map } from "lucide-react";
 import { locations } from "@/data/mockData";
 import { useLocation } from "@/contexts/LocationContext";
+import LocationMap from "./LocationMap";
 
 const LocationSelector = () => {
   const [open, setOpen] = useState(false);
-  const { location, setLocation, detectLocation, detecting } = useLocation();
+  const [mapOpen, setMapOpen] = useState(false);
+  const { location, setLocation, setLocationWithCoords, detectLocation, detecting } = useLocation();
   const [search, setSearch] = useState("");
 
   const filtered = search
@@ -14,6 +16,12 @@ const LocationSelector = () => {
 
   const handleDetect = async () => {
     await detectLocation();
+    setOpen(false);
+  };
+
+  const handleMapConfirm = (address: string, coords: { lat: number; lng: number }) => {
+    setLocationWithCoords(address, coords);
+    setMapOpen(false);
     setOpen(false);
   };
 
@@ -27,7 +35,7 @@ const LocationSelector = () => {
         </svg>
       </button>
 
-      {open && (
+      {open && !mapOpen && (
         <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={() => setOpen(false)}>
           <div className="absolute inset-0 bg-foreground/40 backdrop-blur-sm" />
           <div
@@ -42,14 +50,13 @@ const LocationSelector = () => {
             </div>
 
             {/* Search */}
-            <div className="flex items-center gap-2 px-3 py-2.5 rounded-2xl mb-3" style={{ background: "hsl(var(--muted))" }}>
-              <Search className="w-4 h-4" style={{ color: "hsl(var(--muted-foreground))" }} />
+            <div className="flex items-center gap-2 px-3 py-2.5 rounded-2xl mb-3 bg-muted">
+              <Search className="w-4 h-4 text-muted-foreground" />
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search for your location"
-                className="flex-1 bg-transparent text-sm outline-none"
-                style={{ color: "hsl(var(--foreground))" }}
+                className="flex-1 bg-transparent text-sm outline-none text-foreground placeholder:text-muted-foreground"
               />
             </div>
 
@@ -57,21 +64,29 @@ const LocationSelector = () => {
             <button
               onClick={handleDetect}
               disabled={detecting}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl mb-3 transition-colors active:scale-[0.98]"
-              style={{ background: "hsl(var(--primary) / 0.1)", border: "1px solid hsl(var(--primary) / 0.2)" }}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl mb-2 transition-colors active:scale-[0.98] bg-primary/10 border border-primary/20"
             >
               {detecting ? (
-                <Loader2 className="w-4 h-4 animate-spin" style={{ color: "hsl(var(--primary))" }} />
+                <Loader2 className="w-4 h-4 animate-spin text-primary" />
               ) : (
-                <Navigation className="w-4 h-4" style={{ color: "hsl(var(--primary))" }} />
+                <Navigation className="w-4 h-4 text-primary" />
               )}
-              <span className="text-sm font-semibold" style={{ color: "hsl(var(--primary))" }}>
+              <span className="text-sm font-semibold text-primary">
                 {detecting ? "Detecting..." : "Use Current Location"}
               </span>
             </button>
 
+            {/* Choose on Map */}
+            <button
+              onClick={() => setMapOpen(true)}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl mb-3 transition-colors active:scale-[0.98] bg-secondary/10 border border-secondary/20"
+            >
+              <Map className="w-4 h-4 text-secondary" />
+              <span className="text-sm font-semibold text-secondary">Choose on Map</span>
+            </button>
+
             {/* Location list */}
-            <div className="space-y-1 max-h-56 overflow-y-auto">
+            <div className="space-y-1 max-h-52 overflow-y-auto">
               {filtered.map((loc) => (
                 <button
                   key={loc}
@@ -88,7 +103,7 @@ const LocationSelector = () => {
                 </button>
               ))}
               {filtered.length === 0 && (
-                <p className="text-center py-4 text-sm" style={{ color: "hsl(var(--muted-foreground))" }}>
+                <p className="text-center py-4 text-sm text-muted-foreground">
                   No locations found
                 </p>
               )}
@@ -96,6 +111,9 @@ const LocationSelector = () => {
           </div>
         </div>
       )}
+
+      {/* Full-screen map */}
+      {mapOpen && <LocationMap onClose={() => setMapOpen(false)} onConfirm={handleMapConfirm} />}
     </>
   );
 };
